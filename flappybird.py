@@ -10,15 +10,15 @@ def draw_floor():
 
 def create_pipe():
     random_pipe_position = random.choice(pipe_height)
-    bottom_new_pipe = pipe_surface.get_rect(midtop=(350, random_pipe_position))
+    bottom_new_pipe = pipe_surface.get_rect(midtop=(310, random_pipe_position))
     top_new_pipe = pipe_surface.get_rect(
-        midbottom=(350, random_pipe_position-130))
+        midbottom=(310, random_pipe_position-130))
     return bottom_new_pipe, top_new_pipe
 
 
 def move_pipes(pipes):
     for pipe in pipes:
-        pipe.centerx -= 2.88
+        pipe.centerx -= 2
     return pipes
 
 
@@ -51,7 +51,7 @@ def rotate_bird(bird):
 
 def bird_animation():
     new_bird = bird_frames[bird_index]
-    new_bird_rect = new_bird.get_rect(center=(124, bird_rect.centery))
+    new_bird_rect = new_bird.get_rect(center=(40, bird_rect.centery))
     return new_bird, new_bird_rect
 
 
@@ -90,7 +90,7 @@ game_font = pygame.font.Font(
 gravity = 0.25
 bird_movement = 0
 game_active = True
-score = 0
+score = -1
 high_score = 0
 
 bg_surface = pygame.image.load(
@@ -112,19 +112,21 @@ bird_upflap = pygame.image.load(
 bird_frames = [bird_downflap, bird_midflap, bird_upflap]
 bird_index = 0
 bird_surface = bird_frames[bird_index]
-bird_rect = bird_surface.get_rect(center=(124, 256))
+bird_rect = bird_surface.get_rect(center=(40, 256))
 
 BIRDFLAP = pygame.USEREVENT + 1
 pygame.time.set_timer(BIRDFLAP, 200)
-# bird_surface = pygame.image.load(
-#     r".\game soure material\sprites\bluebird-midflap.png")
-# bird_rect = bird_surface.get_rect(center=(50, 256))
 
+SCORESOUND = pygame.USEREVENT + 2
+pygame.time.set_timer(SCORESOUND, 1350)
+
+ADDSCORE = pygame.USEREVENT + 3
+pygame.time.set_timer(ADDSCORE, 1350)
 pipe_surface = pygame.image.load(
     r".\game soure material\sprites\pipe-green.png")
 pipe_list = []
 SPAWNPIPE = pygame.USEREVENT
-pygame.time.set_timer(SPAWNPIPE, 1000)
+pygame.time.set_timer(SPAWNPIPE, 1350)
 pipe_height = [200, 250, 300, 350, 400]
 
 game_over_surface = pygame.image.load(
@@ -134,8 +136,6 @@ game_over_rect = game_over_surface.get_rect(center=(144, 256))
 flap_sound = pygame.mixer.Sound(r'.\game soure material\audio\wing.wav')
 death_sound = pygame.mixer.Sound(r'.\game soure material\audio\hit.wav')
 score_sound = pygame.mixer.Sound(r'.\game soure material\audio\point.wav')
-score_sound_countdown = 100
-
 
 while True:
     for event in pygame.event.get():
@@ -152,10 +152,9 @@ while True:
             if event.key == pygame.K_SPACE and game_active == False:
                 game_active = True
                 pipe_list.clear()
-                bird_rect.center = (124, 256)
+                bird_rect.center = (40, 256)
                 bird_movement = 0
-                score = 0
-                score_sound_countdown = 100
+                score = -1
 
         if event.type == SPAWNPIPE:
             pipe_list.extend(create_pipe())
@@ -165,6 +164,13 @@ while True:
                 bird_index += 1
             else:
                 bird_index = 0
+
+        if game_active:
+            if event.type == SCORESOUND:
+                score_sound.play()
+
+            if event.type == ADDSCORE:
+                score += 1
 
             bird_surface, bird_rect = bird_animation()
 
@@ -183,12 +189,7 @@ while True:
         draw_pipes(pipe_list)
 
         # score
-        score += 0.011
         score_display('main_game')
-        score_sound_countdown -= 1
-        if score_sound_countdown == 0:
-            score_sound.play()
-            score_sound_countdown = 100
 
     else:
         screen.blit(game_over_surface, game_over_rect)
