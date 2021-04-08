@@ -90,8 +90,9 @@ game_font = pygame.font.Font(
 gravity = 0.25
 bird_movement = 0
 game_active = True
-score = -1
+score = 0
 high_score = 0
+delay_active = False
 
 bg_surface = pygame.image.load(
     r".\game soure material\sprites\background-day.png"
@@ -129,6 +130,9 @@ SPAWNPIPE = pygame.USEREVENT
 pygame.time.set_timer(SPAWNPIPE, 1350)
 pipe_height = [200, 250, 300, 350, 400]
 
+DELAY = pygame.USEREVENT + 4
+pygame.time.set_timer(DELAY, 1350)
+
 game_over_surface = pygame.image.load(
     r".\game soure material\sprites\message.png")
 game_over_rect = game_over_surface.get_rect(center=(144, 256))
@@ -154,7 +158,8 @@ while True:
                 pipe_list.clear()
                 bird_rect.center = (40, 256)
                 bird_movement = 0
-                score = -1
+                score = 0
+                delay_active = False
 
         if event.type == SPAWNPIPE:
             pipe_list.extend(create_pipe())
@@ -165,7 +170,10 @@ while True:
             else:
                 bird_index = 0
 
-        if game_active:
+        if event.type == DELAY:
+            delay_active = True
+
+        if delay_active:
             if event.type == SCORESOUND:
                 score_sound.play()
 
@@ -192,6 +200,7 @@ while True:
         score_display('main_game')
 
     else:
+        delay_active = False
         screen.blit(game_over_surface, game_over_rect)
         high_score = update_score(score, high_score)
         score_display('game_over')
